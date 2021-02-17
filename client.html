@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<!--*	FILE				: client.html
+    *	PROJECT				: Web Design and Development PROG2001 - Assignment 7
+    *	PROGRAMMER			: Andrew Gordon
+    *	FIRST VERSION		: Dec. 8 2020
+    *	DESCRIPTION			: Allows a user to interact with a text box. They cacn open files saves on the server,
+    *                         edit them, overwrite the existing file, or save as new
+    *-->
+
+<head>
+    <title>Text Editor</title>
+    <link rel="stylesheet" href="./css/text_editor_styles.css" />
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            populateDropDown();
+
+            /*  -- Function Header Comment
+            Name	:	populateDropDown
+            Purpose :	Populates the dropdown box with all the files
+            Inputs	:	None
+            Outputs	:	Updates the dropdown box with the latest files
+            Returns	:	None
+            */
+            function populateDropDown() {
+                // clear the dropdown list
+                $("#dropdown").children('option:not(:first)').remove();
+                // create json object
+                $JSONallFiles = JSON.stringify({ 'userSelection': 'allFiles' });
+                $fileUrl = "server.php?args=" + $JSONallFiles;
+
+                // send GET request
+                $.getJSON($fileUrl, function (data) {
+                    // for each filename, append it to the dropdown list
+                    $.each(data, function (index, value) {
+                        $('#dropdown').append(
+                            $('<option></option>').val(value).html(value)
+                        );
+                    });
+                });
+            }
+
+            /*  -- Function Header Comment
+            Name	:	$("#savenewbutton").click
+            Purpose :	Will display the filename textbox and button to save.
+            Inputs	:	None
+            Outputs	:	None
+            Returns	:	None
+            */
+            $("#savenewbutton").click(function () {
+                // show the filename box and save button
+                $("#newSaveText").show();
+                $("#newSaveText").focus();
+                $("#filenamebutton").show();
+            });
+
+            /*  -- Function Header Comment
+            Name	:	$("#filenamebutton").click
+            Purpose :	Called when the user clicks on the Save File button. If a filename was provided a GET
+                        request is sent. It will include a JSON string of the user's selection, the textbox
+                        contents, and the name of the file to be saved
+            Inputs	:	None
+            Outputs	:	status message if the operation was successful or not
+            Returns	:	None
+            */
+            $("#filenamebutton").click(function () {
+                // if the filename box is not empty
+                if ($("#newSaveText").val() != "") {
+                    $.ajax({
+                        type: "GET",
+                        url: "server.php?args=" + JSON.stringify({ 'userSelection': $("#filenamebutton").val(), 'textfile': $("#textinput").val(), 'filename': $("#newSaveText").val() }),
+                        contentType: 'application/json',
+                    }).always(function (data) {
+                        // update status message
+                        $("#status").html(data);
+                    });
+                    // update the dropdown box and hide the filename box and button
+                    populateDropDown();
+                    $("#newSaveText").hide();
+                    $("#newSaveText").val('');
+                    $("#filenamebutton").hide();
+                }
+                else {
+                    $("#status").html("No new filename was entered");
+                }
+            });
+
+            /*  -- Function Header Comment
+            Name	:	$("#overwritebutton").click
+            Purpose :	Called when the user clicks on the Overwrite File button. Will send a GET request
+                        including a JSON string of the user's selection, the textbox contents, and the
+                        name of the file to be overwritten fromt the dropdown
+            Inputs	:	None
+            Outputs	:	status message if the operation was successful or not
+            Returns	:	None
+            */
+            $("#overwritebutton").click(function () {
+                $.ajax({
+                    type: "GET",
+                    url: "server.php?args=" + JSON.stringify({ 'userSelection': $("#overwritebutton").val(), 'textfile': $("#textinput").val(), 'filename': $("#dropdown").val() }),
+                    contentType: 'application/json',
+                }).always(function (data) {
+                    // update status message
+                    $("#status").html(data);
+                });
+                // hide the filename box and button
+                $("#newSaveText").hide();
+                $("#newSaveText").val('');
+                $("#filenamebutton").hide();
+            });
+
+            /*  -- Function Header Comment
+            Name	:	$("#dropdown").mouseup
+            Purpose :	Called when the use selects a file in the file dropdown box to be loaded. 
+                        Sends a GET request with the chosen filename and automatically loads it to
+                        the text input box
+            Inputs	:	None
+            Outputs	:	The selected file contents to the text input area
+            Returns	:	None
+            */
+            $("#dropdown").mouseup(function () {
+                // only run if a file has been selected in the dropdown box
+                if ($("#dropdown").val() != "") {
+                    $.ajax({
+                        type: "GET",
+                        url: "server.php?args=" + JSON.stringify({ 'userSelection': $("#dropdown").val() }),
+                        contentType: 'application/json',
+                    }).always(function (data) {
+                        // insert into the text box
+                        data = JSON.parse(data);
+                        $("#textinput").val(data);
+                    });
+                }
+            });
+        });
+    </script>
+</head>
+
+<p id="div1"></p>
+
+<body>
+    <h2><img id="notepadImg" class="notepadImg" src="./img/notepad.png" alt="Notepad Icon"/>&nbsp;&nbsp;Notepad Editor 1.0</h2>
+    <hr>
+    <table>
+        <tr>
+            <td><button class="finput" id="savenewbutton" value="New File">New File</td>
+            <td><button class="finput" id="overwritebutton" value="Overwrite File">Overwrite File</td>
+            <td>
+                <select id="dropdown">
+                    <option value="">--Select a file--</option>
+                </select>
+            </td>
+            <td><input type="text" id="newSaveText" style="display: none;"></td>
+            <td><button class="finput" id="filenamebutton" style="display: none;" value="Save file">Save file</td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+        </tr>
+    </table>
+    <div id="status" style="color:white;">&nbsp;</div>
+    <textarea id="textinput" autofocus></textarea>
+</body>
+
+
+</html>

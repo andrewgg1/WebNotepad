@@ -1,0 +1,51 @@
+/*
+ *	FILE				: text_editor_styles.css
+ *	PROJECT				: Web Design and Development PROG2001 - Assignment 7
+ *	PROGRAMMER			: Andrew Gordon
+ *	FIRST VERSION		: Dec. 9 2020
+ *	DESCRIPTION			: Contains styles for the text editor 
+ */
+
+ h2 {
+  font-size: 30px;
+  font-weight: bold;
+}
+
+ img.notepadImg {
+  width: 50px;
+  height: 50px;
+  animation-name: notepadAnim;
+  animation-duration: 3s;
+}
+
+ @keyframes notepadAnim {
+  from { transform: rotate(0deg) }
+    to { transform: rotate(360deg) }
+}
+
+
+ body {
+  display: table;
+  margin: auto;
+  text-align: center;
+  background-color: #008cff;
+  font-family: Arial;
+  }
+
+button.finput{
+  background-color: #a56b15;
+  border: none;
+  color: rgb(0, 0, 0);
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+
+  textarea{
+    height: 600px;
+    width: 600px;
+}
